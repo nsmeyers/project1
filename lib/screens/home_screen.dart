@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:project1/functions/firebase_functions.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -14,7 +16,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
 
   Future<List<Transaction>> fetchTransactions() async {
-    final response = await http.get(Uri.parse('https://my.api.mockaroo.com/account.json?key=fbb1c1a0'));
+    final response = await http.get(
+        Uri.parse('https://my.api.mockaroo.com/account.json?key=fbb1c1a0'));
 
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
@@ -36,7 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
                   List<Transaction> data = snapshot.data!;
-                  bool hasValidData = data.any((transaction) => transaction.isValid());
+                  bool hasValidData =
+                      data.any((transaction) => transaction.isValid());
                   if (!hasValidData) {
                     return Center(child: Text('Error Fetching Data'));
                   }
@@ -45,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       Transaction transaction = data[index];
                       return ExpansionTile(
-                        title: Text('Date: ${transaction.date ?? 'N/A'} | Amount: \$${transaction.amount ?? 'N/A'}'),
+                        title: Text('Amount: ${transaction.amount ?? 'N/A'} | Date: ${transaction.date ?? 'N/A'} '),
                         children: <Widget>[
                           ListTile(
                             title: Text('Transaction ID: ${transaction.transactionId ?? 'N/A'}'),
@@ -145,7 +149,7 @@ class Transaction {
     }
 
     return Transaction(
-      userId: json['UserID?'] as int?,
+      userId: json['UserID'] as int?,
       transactionId: json['TransactionID'] as int?,
       type: json['TransactionType'] as String?,
       amount: amount,
@@ -156,8 +160,10 @@ class Transaction {
   }
 
   bool isValid() {
-    return userId != null || transactionId != null || amount != null || direction != null || date != null;
+    return userId != null ||
+        transactionId != null ||
+        amount != null ||
+        direction != null ||
+        date != null;
   }
 }
-
-

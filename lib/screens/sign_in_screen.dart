@@ -82,7 +82,11 @@ class _SignInScreenState extends State<SignInScreen> {
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
                           } else {
-                            Navigator.pushNamed(context, "/home");
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              "/home",
+                              (route) => false,
+                            );
                           }
                         });
                       } else {

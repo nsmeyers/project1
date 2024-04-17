@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 class Transaction {
   final int? userId;
   final int? transactionId;
@@ -41,5 +44,55 @@ class Transaction {
         amount != null ||
         direction != null ||
         date != null;
+  }
+}
+
+class AppUser {
+  final String email;
+  final int id;
+  final String? pfp;
+  final String uid;
+  final String username;
+
+  AppUser({
+    required this.email,
+    required this.id,
+    required this.pfp,
+    required this.uid,
+    required this.username,
+  });
+
+  factory AppUser.fromMap(Map<String, dynamic> map) {
+    return AppUser(
+      email: map['email'],
+      id: map['id'],
+      pfp: map['pfp'],
+      uid: map['uid'],
+      username: map['username'],
+    );
+  }
+
+  Future<void> updatePfp(String pfp) async {
+    String userUid = FirebaseAuth.instance.currentUser!.uid;
+    QuerySnapshot userDocs = await FirebaseFirestore.instance
+        .collection("users")
+        .where("uid", isEqualTo: userUid)
+        .get();
+    String userDocId = userDocs.docs[0].id;
+    await FirebaseFirestore.instance
+        .doc("users/$userDocId")
+        .update({"pfp": pfp});
+  }
+
+  Future<void> updateUsername(String username) async {
+    String userUid = FirebaseAuth.instance.currentUser!.uid;
+    QuerySnapshot userDocs = await FirebaseFirestore.instance
+        .collection("users")
+        .where("uid", isEqualTo: userUid)
+        .get();
+    String userDocId = userDocs.docs[0].id;
+    await FirebaseFirestore.instance
+        .doc("users/$userDocId")
+        .update({"username": username});
   }
 }

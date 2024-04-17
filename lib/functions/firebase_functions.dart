@@ -80,13 +80,13 @@ Future<int> getUserId() async {
   return userData["id"] as int;
 }
 
-Future<Map> getUserDoc() async {
+Future<Map<String, dynamic>> getUserDoc() async {
   String userUid = FirebaseAuth.instance.currentUser!.uid;
   QuerySnapshot userDocs = await FirebaseFirestore.instance
       .collection("users")
       .where("uid", isEqualTo: userUid)
       .get();
   DocumentSnapshot userDoc = userDocs.docs[0];
-  Map userData = userDoc.data() as Map;
+  Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
   return userData;
 }

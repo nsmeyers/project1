@@ -44,19 +44,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (!hasValidData) {
                     return Center(child: Text('Error Fetching Data'));
                   }
-                  return ListView.builder(
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
-                      Transaction transaction = data[index];
-                      return ExpansionTile(
-                        title: Text('Date: ${transaction.date ?? 'N/A'} | Amount: \$${transaction.amount ?? 'N/A'}'),
-                        children: <Widget>[
-                          ListTile(
-                            title: Text('Transaction ID: ${transaction.transactionId ?? 'N/A'}'),
-                            subtitle: Text('Type: ${transaction.type ?? 'N/A'}\nStatus: ${transaction.status ?? 'N/A'}'),
-                          ),
-                        ],
-                      );
+                  return FutureBuilder<int>(
+                    future: getUserId(),
+                    builder: (context, userIdSnapshot) {
+                      if (userIdSnapshot.connectionState ==
+                          ConnectionState.done) {
+                        if (userIdSnapshot.hasData) {
+                          int? userId = userIdSnapshot.data;
+                          return ListView.builder(
+                            itemCount: data.length,
+                            itemBuilder: (context, index) {
+                              Transaction transaction = data[index];
+                              if (transaction.userId == userId) {
+                                return ExpansionTile(
+                                  title: Text(
+                                      'Date: ${transaction.date ?? 'N/A'} | Amount: \$${transaction.amount ?? 'N/A'}'),
+                                  children: <Widget>[
+                                    ListTile(
+                                      title: Text(
+                                          'Transaction ID: ${transaction.transactionId ?? 'N/A'}'),
+                                      subtitle: Text(
+                                          'Type: ${transaction.type ?? 'N/A'}\nStatus: ${transaction.status ?? 'N/A'}'),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return SizedBox.shrink();
+                              }
+                            },
+                          );
+                        } else if (userIdSnapshot.hasError) {
+                          return Center(child: Text("Error Fetching User ID"));
+                        }
+                      }
+                      return const CircularProgressIndicator();
                     },
                   );
                 } else if (snapshot.hasError) {

@@ -92,7 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 16),
                     Text("Username: $username"),
                     const SizedBox(height: 16),
-                    Text("Email $email"),
+                    Text("Email: $email"),
                     const SizedBox(height: 16),
                     Text("ID: ${id.toString()}"),
                   ],

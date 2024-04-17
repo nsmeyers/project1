@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:project1/functions/firebase_functions.dart';
+import 'package:project1/screens/transaction_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -56,17 +57,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             itemBuilder: (context, index) {
                               Transaction transaction = data[index];
                               if (transaction.userId == userId) {
-                                return ExpansionTile(
-                                  title: Text(
-                                      'Date: ${transaction.date ?? 'N/A'} | Amount: \$${transaction.amount ?? 'N/A'}'),
-                                  children: <Widget>[
-                                    ListTile(
-                                      title: Text(
-                                          'Transaction ID: ${transaction.transactionId ?? 'N/A'}'),
-                                      subtitle: Text(
-                                          'Type: ${transaction.type ?? 'N/A'}\nStatus: ${transaction.status ?? 'N/A'}'),
-                                    ),
-                                  ],
+                                return ListTile(
+                                title: Text('Amount: \$${transaction.amount ?? 'N/A'} | Date: ${transaction.date ?? 'N/A'}'),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => TransactionDetailsScreen(transaction: transaction),
+                                      ),
+                                    );
+                                  },
                                 );
                               } else {
                                 return SizedBox.shrink();

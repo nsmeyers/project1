@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       Transaction transaction = data[index];
                       return ExpansionTile(
-                        title: Text('Amount: ${transaction.amount ?? 'N/A'} | Date: ${transaction.date ?? 'N/A'} '),
+                        title: Text('Date: ${transaction.date ?? 'N/A'} | Amount: \$${transaction.amount ?? 'N/A'}'),
                         children: <Widget>[
                           ListTile(
                             title: Text('Transaction ID: ${transaction.transactionId ?? 'N/A'}'),

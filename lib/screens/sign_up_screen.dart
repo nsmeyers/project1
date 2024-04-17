@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:project1/functions/firebase_functions.dart';
 
 import '../styling.dart';
@@ -18,6 +21,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  File? _imgFile;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +41,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
             key: _key,
             child: Column(
               children: [
+                CircleAvatar(
+                  radius: 65,
+                  backgroundColor: Colors.white,
+                  backgroundImage: (_imgFile == null)
+                      ? AssetImage('images/default_pfp.png')
+                      : FileImage(_imgFile!) as ImageProvider,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        final XFile? img = await picker.pickImage(
+                          source: ImageSource.gallery,
+                          maxHeight: 250,
+                          maxWidth: 250,
+                        );
+                        if (img == null) return;
+                        setState(() {
+                          _imgFile = File(img.path);
+                        });
+                      },
+                      child: Text("Add Image"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => setState(() {
+                        _imgFile = null;
+                      }),
+                      child: Text("Remove Image"),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _usernameController,
                   validator: (username) => isUsernameValid(username),
@@ -76,6 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           _usernameController.text,
                           _emailController.text,
                           _passwordController.text,
+                          _imgFile,
                         ).then((value) {
                           if (value != null) {
                             final snackBar = SnackBar(
@@ -85,8 +125,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
-                          } else  {
-                            Navigator.pushNamed(context, "/home");
+                          } else {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              "/home",
+                              (route) => false,
+                            );
                           }
                         });
                       } else {

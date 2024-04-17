@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'home_screen.dart';
+import 'package:project1/models.dart';
 
 class TransactionDetailsScreen extends StatelessWidget {
   final Transaction transaction;

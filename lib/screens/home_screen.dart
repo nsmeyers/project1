@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:project1/functions/firebase_functions.dart';
+import 'package:project1/models.dart';
+import 'package:project1/screens/profile_screen.dart';
 import 'package:project1/screens/transaction_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -92,12 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text('Page 2'),
             ),
           ),
-          Container(
-            color: Colors.green,
-            child: const Center(
-              child: Text('Page 3'),
-            ),
-          ),
+          const ProfileScreen(),
         ],
         onPageChanged: (index) {
           setState(() {
@@ -142,48 +139,3 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class Transaction {
-  final int? userId;
-  final int? transactionId;
-  final String? type;
-  final double? amount;
-  final String? status;
-  final String? date;
-  final String? direction;
-
-  Transaction({
-    this.userId,
-    this.transactionId,
-    this.type,
-    this.amount,
-    this.status,
-    this.date,
-    this.direction,
-  });
-
-  factory Transaction.fromJson(Map<String, dynamic> json) {
-    double? amount = (json['Amount'] as num?)?.toDouble();
-    String? direction = json['Direction'] as String?;
-    if (direction == "Outgoing") {
-      amount = amount != null ? -amount : null;
-    }
-
-    return Transaction(
-      userId: json['UserID'] as int?,
-      transactionId: json['TransactionID'] as int?,
-      type: json['TransactionType'] as String?,
-      amount: amount,
-      status: json['Status'] as String?,
-      date: json['Date'] as String?,
-      direction: direction,
-    );
-  }
-
-  bool isValid() {
-    return userId != null ||
-        transactionId != null ||
-        amount != null ||
-        direction != null ||
-        date != null;
-  }
-}

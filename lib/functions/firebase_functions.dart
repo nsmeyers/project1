@@ -34,6 +34,8 @@ Future<String?> signUp(
 
     if (pfp != null) {
       userData["pfp"] = base64Encode(pfp.readAsBytesSync());
+    } else {
+      userData["pfp"] = "null";
     }
 
     FirebaseFirestore.instance.collection("users").add(userData);

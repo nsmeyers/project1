@@ -89,7 +89,7 @@ class Transaction {
 class AppUser {
   final String email;
   final int id;
-  final String? pfp;
+  final String pfp;
   final String username;
 
   AppUser({
@@ -118,6 +118,8 @@ class AppUser {
     await FirebaseFirestore.instance
         .doc("users/$userDocId")
         .update({"pfp": pfp});
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString("pfp", pfp);
   }
 
   Future<void> updateUsername(String username) async {

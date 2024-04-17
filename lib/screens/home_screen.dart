@@ -36,7 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
                   List<Transaction> data = snapshot.data!;
-                  // Check if data is empty or all items are essentially null
                   bool hasValidData = data.any((transaction) => transaction.isValid());
                   if (!hasValidData) {
                     return Center(child: Text('Error Fetching Data'));
@@ -44,8 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   return ListView.builder(
                     itemCount: data.length,
                     itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text('Amount: \$${data[index].amount ?? 'N/A'} | Date: ${data[index].date ?? 'N/A'} | Type: ${data[index].type ?? 'N/A'} | Status: ${data[index].status ?? 'N/A'} | Transaction ID: ${data[index].transactionId ?? 'N/A'}'),
+                      Transaction transaction = data[index];
+                      return ExpansionTile(
+                        title: Text('Date: ${transaction.date ?? 'N/A'} | Amount: \$${transaction.amount ?? 'N/A'}'),
+                        children: <Widget>[
+                          ListTile(
+                            title: Text('Transaction ID: ${transaction.transactionId ?? 'N/A'}'),
+                            subtitle: Text('Type: ${transaction.type ?? 'N/A'}\nStatus: ${transaction.status ?? 'N/A'}'),
+                          ),
+                        ],
                       );
                     },
                   );
@@ -119,6 +125,7 @@ class Transaction {
   final double? amount;
   final String? status;
   final String? date;
+  final String? direction;
 
   Transaction({
     this.userId,
@@ -127,21 +134,30 @@ class Transaction {
     this.amount,
     this.status,
     this.date,
+    this.direction,
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
+    double? amount = (json['Amount'] as num?)?.toDouble();
+    String? direction = json['Direction'] as String?;
+    if (direction == "Outgoing") {
+      amount = amount != null ? -amount : null;
+    }
+
     return Transaction(
-      userId: json['UserID'] as int?,
+      userId: json['UserID?'] as int?,
       transactionId: json['TransactionID'] as int?,
       type: json['TransactionType'] as String?,
-      amount: (json['Amount'] as num?)?.toDouble(),
+      amount: amount,
       status: json['Status'] as String?,
       date: json['Date'] as String?,
+      direction: direction,
     );
   }
 
   bool isValid() {
-    return userId != null || transactionId != null || amount != null || type != null || status != null || date != null;
+    return userId != null || transactionId != null || amount != null || direction != null || date != null;
   }
 }
+
 

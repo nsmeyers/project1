@@ -11,8 +11,20 @@ Future<String?> signUp(String username, String email, String password) async {
 
     await userCredential.user!.updateDisplayName(username);
 
+    // Get the current user count
+    DocumentSnapshot snapshot =
+        await FirebaseFirestore.instance.collection("metadata").doc("user_count").get();
+    int userCount = (snapshot.exists ? (snapshot.data()! as Map<String, dynamic>)['count'] : 0) + 1;
+
     FirebaseFirestore.instance.collection("users").add({
       "uid": userCredential.user!.uid,
+      "id": userCount,
+      "email": userCredential.user!.email,
+    });
+
+    // Update the user count in Firestore
+    await FirebaseFirestore.instance.collection("metadata").doc("user_count").set({
+      "count": userCount,
     });
 
     return null;

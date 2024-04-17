@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,6 +7,7 @@ import 'package:project1/functions/firebase_functions.dart';
 import 'package:project1/models.dart';
 import 'package:project1/screens/profile_screen.dart';
 import 'package:project1/screens/transaction_details_screen.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,9 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
                   List<Transaction> data = snapshot.data!;
-                  bool hasValidData =
-                      data.any((transaction) => transaction.isValid());
-                  if (!hasValidData) {
+                  // Since all data returned by fetchTransactions are already validated, no need to check again
+                  if (data.isEmpty) {  // Checking if no data is received or all data was invalid
                     return Center(child: Text('Error Fetching Data'));
                   }
                   return FutureBuilder<int>(
@@ -90,9 +91,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Container(
             color: Colors.blue,
-            child: const Center(
-              child: Text('Page 2'),
-            ),
+              child: BarChart(
+                BarChartData(
+                  barGroups: [
+
+                  ]
+                  // read about it in the BarChartData section
+                ),
+              ),
           ),
           const ProfileScreen(),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project1/functions/firebase_functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../styling.dart';
 import '../functions/form_validators.dart';
@@ -73,15 +74,34 @@ class _SignInScreenState extends State<SignInScreen> {
                         signIn(
                           _emailController.text,
                           _passwordController.text,
-                        ).then((value) {
+                        ).then((value) async {
                           if (value != null) {
-                            final snackBar = SnackBar(
-                              content: Text(value),
-                            );
+                            final snackBar = SnackBar(content: Text(value));
 
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
                           } else {
+                            SharedPreferences.getInstance().then((prefs) async {
+                              Map<String, dynamic> userDoc = await getUserDoc();
+
+                              await prefs.setString(
+                                'email',
+                                userDoc["email"],
+                              );
+                              await prefs.setInt(
+                                'id',
+                                userDoc["id"],
+                              );
+                              await prefs.setString(
+                                'pfp',
+                                userDoc["pfp"],
+                              );
+                              await prefs.setString(
+                                'username',
+                                userDoc["username"],
+                              );
+                            });
+
                             Navigator.pushNamedAndRemoveUntil(
                               context,
                               "/home",

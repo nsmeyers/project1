@@ -69,17 +69,6 @@ Future<String?> signIn(String email, String password) async {
   }
 }
 
-Future<int> getUserId() async {
-  String userUid = FirebaseAuth.instance.currentUser!.uid;
-  QuerySnapshot userDocs = await FirebaseFirestore.instance
-      .collection("users")
-      .where("uid", isEqualTo: userUid)
-      .get();
-  DocumentSnapshot userDoc = userDocs.docs[0];
-  Map userData = userDoc.data() as Map;
-  return userData["id"] as int;
-}
-
 Future<Map<String, dynamic>> getUserDoc() async {
   String userUid = FirebaseAuth.instance.currentUser!.uid;
   QuerySnapshot userDocs = await FirebaseFirestore.instance

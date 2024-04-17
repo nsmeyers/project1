@@ -90,14 +90,12 @@ class AppUser {
   final String email;
   final int id;
   final String? pfp;
-  final String uid;
   final String username;
 
   AppUser({
     required this.email,
     required this.id,
     required this.pfp,
-    required this.uid,
     required this.username,
   });
 
@@ -106,7 +104,6 @@ class AppUser {
       email: map['email'],
       id: map['id'],
       pfp: map['pfp'],
-      uid: map['uid'],
       username: map['username'],
     );
   }

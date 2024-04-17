@@ -12,6 +12,7 @@ class Project1 extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF725E)),
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,

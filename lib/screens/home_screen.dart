@@ -8,6 +8,7 @@ import 'package:project1/models.dart';
 import 'package:project1/screens/profile_screen.dart';
 import 'package:project1/screens/transaction_details_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,46 +45,37 @@ class _HomeScreenState extends State<HomeScreen> {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
                   List<Transaction> data = snapshot.data!;
-                  // Since all data returned by fetchTransactions are already validated, no need to check again
-                  if (data.isEmpty) {  // Checking if no data is received or all data was invalid
-                    return Center(child: Text('Error Fetching Data'));
+                  if (data.isEmpty) {
+                    return const Center(child: Text('Error Fetching Data'));
                   }
-                  return FutureBuilder<int>(
-                    future: getUserId(),
-                    builder: (context, userIdSnapshot) {
-                      if (userIdSnapshot.connectionState ==
-                          ConnectionState.done) {
-                        if (userIdSnapshot.hasData) {
-                          int? userId = userIdSnapshot.data;
-                          return ListView.builder(
-                            itemCount: data.length,
-                            itemBuilder: (context, index) {
-                              Transaction transaction = data[index];
-                              if (transaction.userId == userId) {
-                                return ListTile(
-                                title: Text('Amount: \$${transaction.amount ?? 'N/A'} | Date: ${transaction.date ?? 'N/A'}'),
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => TransactionDetailsScreen(transaction: transaction),
-                                      ),
-                                    );
-                                  },
-                                );
-                              } else {
-                                return SizedBox.shrink();
-                              }
+                  SharedPreferences.getInstance().then((prefs) async {
+                    int? userId = prefs.getInt('id');
+                    return ListView.builder(
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        Transaction transaction = data[index];
+                        if (transaction.userId == userId) {
+                          return ListTile(
+                            title: Text(
+                              'Amount: \$${transaction.amount ?? 'N/A'} | Date: ${transaction.date ?? 'N/A'}',
+                            ),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      TransactionDetailsScreen(
+                                    transaction: transaction,
+                                  ),
+                                ),
+                              );
                             },
                           );
-                        } else if (userIdSnapshot.hasError) {
-                          return Center(child: Text("Error Fetching User ID"));
                         }
-                      }
-                      return const CircularProgressIndicator();
-                    },
-                  );
+                      },
+                    );
+                  });
                 } else if (snapshot.hasError) {
-                  return Center(child: Text("Error Fetching Data"));
+                  return const Center(child: Text("Error Fetching Data"));
                 }
               }
               return const CircularProgressIndicator();
@@ -91,14 +83,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Container(
             color: Colors.blue,
-              child: BarChart(
-                BarChartData(
-                  barGroups: [
-
-                  ]
+            child: BarChart(
+              BarChartData(barGroups: []
                   // read about it in the BarChartData section
-                ),
-              ),
+                  ),
+            ),
           ),
           const ProfileScreen(),
         ],
@@ -144,4 +133,3 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 }
-

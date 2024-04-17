@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:project1/functions/firebase_functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../styling.dart';
 import '../functions/form_validators.dart';
@@ -126,6 +127,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
                           } else {
+                            SharedPreferences.getInstance().then((prefs) async {
+                              Map<String, dynamic> userDoc = await getUserDoc();
+
+                              await prefs.setString(
+                                'email',
+                                userDoc["email"],
+                              );
+                              await prefs.setInt(
+                                'id',
+                                userDoc["id"],
+                              );
+                              await prefs.setString(
+                                'pfp',
+                                userDoc["pfp"],
+                              );
+                              await prefs.setString(
+                                'username',
+                                userDoc["username"],
+                              );
+                            });
+
                             Navigator.pushNamedAndRemoveUntil(
                               context,
                               "/home",

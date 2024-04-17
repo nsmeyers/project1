@@ -131,12 +131,12 @@ class Transaction {
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
-      userId: json['user_id'] as int?,
-      transactionId: json['transaction_id'] as int?,
-      type: json['type'] as String?,
-      amount: (json['amount'] as num?)?.toDouble(),
-      status: json['status'] as String?,
-      date: json['date'] as String?,
+      userId: json['UserID'] as int?,
+      transactionId: json['TransactionID'] as int?,
+      type: json['TransactionType'] as String?,
+      amount: (json['Amount'] as num?)?.toDouble(),
+      status: json['Status'] as String?,
+      date: json['Date'] as String?,
     );
   }
 

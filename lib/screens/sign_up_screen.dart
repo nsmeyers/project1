@@ -128,23 +128,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 .showSnackBar(snackBar);
                           } else {
                             SharedPreferences.getInstance().then((prefs) async {
-                              Map<String, dynamic> userDoc = await getUserDoc();
+                              (String, Map<String, dynamic>) userDoc =
+                                  await getUserDoc();
 
                               await prefs.setString(
+                                "userDocId",
+                                userDoc.$1,
+                              );
+                              await prefs.setString(
                                 'email',
-                                userDoc["email"],
+                                userDoc.$2["email"],
                               );
                               await prefs.setInt(
                                 'id',
-                                userDoc["id"],
+                                userDoc.$2["id"],
                               );
                               await prefs.setString(
                                 'pfp',
-                                userDoc["pfp"],
+                                userDoc.$2["pfp"],
                               );
                               await prefs.setString(
                                 'username',
-                                userDoc["username"],
+                                userDoc.$2["username"],
                               );
                             });
 

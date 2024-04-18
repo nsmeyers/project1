@@ -109,28 +109,18 @@ class AppUser {
   }
 
   Future<void> updatePfp(String pfp) async {
-    String userUid = FirebaseAuth.instance.currentUser!.uid;
-    QuerySnapshot userDocs = await FirebaseFirestore.instance
-        .collection("users")
-        .where("uid", isEqualTo: userUid)
-        .get();
-    String userDocId = userDocs.docs[0].id;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await FirebaseFirestore.instance
-        .doc("users/$userDocId")
+        .doc("users/${prefs.getString("userDocId")}")
         .update({"pfp": pfp});
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString("pfp", pfp);
+    await prefs.setString("pfp", pfp);
   }
 
   Future<void> updateUsername(String username) async {
-    String userUid = FirebaseAuth.instance.currentUser!.uid;
-    QuerySnapshot userDocs = await FirebaseFirestore.instance
-        .collection("users")
-        .where("uid", isEqualTo: userUid)
-        .get();
-    String userDocId = userDocs.docs[0].id;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await FirebaseFirestore.instance
-        .doc("users/$userDocId")
+        .doc("users/${prefs.getString("userDocId")}")
         .update({"username": username});
+    await prefs.setString("username", username);
   }
 }

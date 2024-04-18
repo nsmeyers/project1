@@ -44,9 +44,7 @@ Future<String?> signUp(
     await FirebaseFirestore.instance
         .collection("metadata")
         .doc("user_count")
-        .set({
-      "count": userCount,
-    });
+        .set({"count": userCount});
 
     return null;
   } on FirebaseAuthException catch (e) {
@@ -71,7 +69,7 @@ Future<String?> signIn(String email, String password) async {
   }
 }
 
-Future<Map<String, dynamic>> getUserDoc() async {
+Future<(String, Map<String, dynamic>)> getUserDoc() async {
   String userUid = FirebaseAuth.instance.currentUser!.uid;
   QuerySnapshot userDocs = await FirebaseFirestore.instance
       .collection("users")
@@ -79,5 +77,5 @@ Future<Map<String, dynamic>> getUserDoc() async {
       .get();
   DocumentSnapshot userDoc = userDocs.docs[0];
   Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-  return userData;
+  return (userDoc.id, userData);
 }

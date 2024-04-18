@@ -9,8 +9,11 @@ class ChartsScreen extends StatefulWidget {
   _ChartsScreenState createState() => _ChartsScreenState();
 }
 
+enum ChartType { bar, pie }
+
 class _ChartsScreenState extends State<ChartsScreen> {
   late Future<Map<String, double>> totalsFuture;
+  ChartType _selectedChart = ChartType.bar; // Default chart type
 
   @override
   void initState() {
@@ -31,44 +34,9 @@ class _ChartsScreenState extends State<ChartsScreen> {
         totalOutgoing += transaction.amount ?? 0.0;
       }
     }
-    netTotal = totalIncoming + totalOutgoing;
+    netTotal = totalIncoming + totalOutgoing; // Correct calculation for net total
 
     return {'TotalIncoming': totalIncoming, 'TotalOutgoing': totalOutgoing, 'NetTotal': netTotal};
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Spending Overview",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.grey[900],
-      ),
-      body: Column(
-        children: [
-          FutureBuilder<Map<String, double>>(
-            future: totalsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasData) {
-                  return buildBanner(snapshot.data!);
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-              }
-              return LinearProgressIndicator();
-            },
-          ),
-          Expanded(
-            child: Container(
-              // Placeholder for additional UI components or charts
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget buildBanner(Map<String, double> totals) {
@@ -97,5 +65,103 @@ class _ChartsScreenState extends State<ChartsScreen> {
       ),
     );
   }
-}
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Spending Overview", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.grey[900],
+      ),
+      body: Column(
+        children: [
+          FutureBuilder<Map<String, double>>(
+            future: totalsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasData) {
+                  return Column(
+
+                    children: [
+                      buildBanner(snapshot.data!),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Radio<ChartType>(
+                            value: ChartType.bar,
+                            groupValue: _selectedChart,
+                            onChanged: (ChartType? value) {
+                              setState(() {
+                                _selectedChart = value!;
+                              });
+                            },
+                            activeColor: Colors.grey[900], // Set the active color
+                            fillColor: MaterialStateProperty.all(Colors.grey[900]),
+                          ),
+                          const Text('Bar Chart'),
+                          Radio<ChartType>(
+                            value: ChartType.pie,
+                            groupValue: _selectedChart,
+                            onChanged: (ChartType? value) {
+                              setState(() {
+                                _selectedChart = value!;
+                              });
+                            },
+                            activeColor: Colors.grey[900], // Set the active color
+                            fillColor: MaterialStateProperty.all(Colors.grey[900]),
+                          ),
+                          const Text('Pie Chart'),
+                        ],
+                      ),
+                    ],
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+              }
+              return const CircularProgressIndicator();
+            },
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(8),
+              child: _selectedChart == ChartType.bar ? _buildBarChart() : _buildPieChart(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBarChart() {
+    // Prepare your data for the chart
+    return BarChart(
+      BarChartData(
+        borderData: FlBorderData(show: false),
+        barGroups: [
+          BarChartGroupData(
+            x: 0,
+            barRods: [
+              BarChartRodData(toY: 10, color: Colors.green), // Adjusted from 'y' to 'toY'
+              BarChartRodData(toY: 5, color: Colors.red), // Adjusted from 'y' to 'toY'
+            ],
+            //showingTooltipIndicators: [0, 1],
+          ),
+          // Add more groups as needed based on your data
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPieChart() {
+    // Example data, replace with real data preparation logic
+    return PieChart(
+      PieChartData(
+        sections: [
+          PieChartSectionData(value: 60, color: Colors.green, title: 'Type A'),
+          PieChartSectionData(value: 40, color: Colors.red, title: 'Type B'),
+        ],
+      ),
+    );
+  }
+}

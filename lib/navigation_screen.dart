@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:project1/screens/home_screen.dart';
 import 'package:project1/screens/profile_screen.dart';
 
+import 'models/models.dart';
 import 'screens/charts_screen.dart';
 
 class NavigationScreen extends StatefulWidget {
@@ -18,13 +19,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppUser user = ModalRoute.of(context)?.settings.arguments as AppUser;
+    
     return Scaffold(
       body: PageView(
         controller: _pageController,
         children: [
-          const HomeScreen(),
-          const ChartsScreen(),
-          const ProfileScreen(),
+          HomeScreen(user: user),
+          ChartsScreen(),
+          ProfileScreen(user: user),
         ],
         onPageChanged: (index) {
           setState(() {

@@ -10,7 +10,12 @@ import '../functions/form_validators.dart';
 import '../models/models.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({
+    Key? key,
+    required this.user,
+  }) : super(key: key);
+
+  final AppUser user;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -55,18 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (pref.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else {
-              int? id = pref.data!.getInt("id");
-              String? email = pref.data!.getString("email");
-              String? username = pref.data!.getString("username");
-              String? pfpString = pref.data!.getString("pfp");
-
-              AppUser user = AppUser(
-                email: email!,
-                id: id!,
-                pfp: pfpString!,
-                username: username!,
-              );
-
+              SharedPreferences prefs = pref.data!;
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
@@ -77,9 +71,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       CircleAvatar(
                         radius: 65,
                         backgroundColor: Colors.white,
-                        backgroundImage: (user.pfp == "null")
+                        backgroundImage: (prefs.getString("pfp") == "null")
                             ? const AssetImage('images/default_pfp.png')
-                            : MemoryImage(base64Decode(user.pfp))
+                            : MemoryImage(base64Decode(prefs.getString("pfp")!))
                                 as ImageProvider,
                       ),
                       const SizedBox(height: 16),
@@ -91,14 +85,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               File? imgFile = await chooseImage();
                               String imgString =
                                   base64Encode(imgFile!.readAsBytesSync());
-                              await user.updatePfp(imgString);
+                              await widget.user.updatePfp(imgString);
                               setState(() {});
                             },
                             child: const Text("Update"),
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              await user.updatePfp("null");
+                              await widget.user.updatePfp("null");
                               setState(() {});
                             },
                             child: const Text("Remove"),
@@ -125,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   controller: _newUsernameController,
                                   decoration: InputDecoration(
                                     border: const OutlineInputBorder(),
-                                    hintText: username,
+                                    hintText: prefs.getString("username"),
                                   ),
                                 ),
                               ),
@@ -133,7 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ElevatedButton(
                                 onPressed: () async {
                                   if (_key.currentState!.validate()) {
-                                    await user.updateUsername(
+                                    await widget.user.updateUsername(
                                         _newUsernameController.text);
                                     _newUsernameController.clear();
                                     setState(() {});
@@ -146,9 +140,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Text("Email: $email"),
+                      Text("Email: ${prefs.getString("email")}"),
                       const SizedBox(height: 16),
-                      Text("ID: ${id.toString()}"),
+                      Text("ID: ${prefs.getInt("id")}"),
                     ],
                   ),
                 ),

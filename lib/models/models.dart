@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +11,7 @@ class Transaction {
   final String? status;
   final String? date;
   final String? direction;
+  final bool isFavorite = false;
 
   Transaction({
     this.userId,
@@ -101,12 +101,14 @@ class Transaction {
 class AppUser {
   final String email;
   final int id;
+  final String docId;
   final String pfp;
   final String username;
 
   AppUser({
     required this.email,
     required this.id,
+    required this.docId,
     required this.pfp,
     required this.username,
   });
@@ -115,6 +117,7 @@ class AppUser {
     return AppUser(
       email: map['email'],
       id: map['id'],
+      docId: map['docId'],
       pfp: map['pfp'],
       username: map['username'],
     );
@@ -122,17 +125,43 @@ class AppUser {
 
   Future<void> updatePfp(String pfp) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await FirebaseFirestore.instance
-        .doc("users/${prefs.getString("userDocId")}")
-        .update({"pfp": pfp});
+    await FirebaseFirestore.instance.doc("users/$docId").update({"pfp": pfp});
     await prefs.setString("pfp", pfp);
   }
 
   Future<void> updateUsername(String username) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await FirebaseFirestore.instance
-        .doc("users/${prefs.getString("userDocId")}")
+        .doc("users/$docId")
         .update({"username": username});
     await prefs.setString("username", username);
+  }
+
+  Future<Map<String, dynamic>> getUserFavorites() async {
+    QuerySnapshot userFavorites = await FirebaseFirestore.instance
+        .collection("users/$docId/favorites")
+        .get();
+
+    Map<String, dynamic> favoritesMap = {};
+    for (var doc in userFavorites.docs) {
+      favoritesMap[doc.id] = doc.data();
+    }
+
+    return favoritesMap;
+  }
+
+  Future<void> saveUserFavorites(
+      Map<String, dynamic> transactionDetails) async {
+    await FirebaseFirestore.instance
+        .collection("users/$docId/favorites")
+        .doc(transactionDetails["TransactionID"].toString())
+        .set(transactionDetails);
+  }
+
+  Future<void> deleteUserFavorites(String transcationId) async {
+    await FirebaseFirestore.instance
+        .collection("users/$docId/favorites")
+        .doc(transcationId)
+        .delete();
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:project1/functions/choose_image.dart';
 
 import '../functions/firebase_functions.dart';

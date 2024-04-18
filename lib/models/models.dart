@@ -13,6 +13,7 @@ class Transaction {
   final String? date;
   final String? direction;
 
+
   Transaction({
     this.userId,
     this.transactionId,
@@ -24,13 +25,21 @@ class Transaction {
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
+
+    double? adjustedAmount = json['Amount'] is int
+        ? (json['Amount'] as int).toDouble()
+        : json['Amount'] as double?;
+
+    // Adjust the amount if the direction is 'Outgoing'
+    if (json['Direction'] == 'Outgoing') {
+      adjustedAmount = -(adjustedAmount ?? 0.0);
+    }
+
     return Transaction(
       userId: json['UserID'] as int?,
       transactionId: json['TransactionID'] as int?,
       type: json['TransactionType'] as String?,
-      amount: json['Amount'] is int
-          ? (json['Amount'] as int).toDouble()
-          : json['Amount'] as double?,
+      amount: adjustedAmount,
       status: json['Status'] as String?,
       date: json['Date'] as String?,
       direction: json['Direction'] as String?,
@@ -94,7 +103,29 @@ class Transaction {
     print('Transactions for User ID $userId: ${transactions.length}');
 
     // Validate each transaction and filter out invalid ones
+
+    Map<String, List<double>> organizeChartData(List<Transaction> transactions) {
+      double totalIncoming = 0;
+      double totalOutgoing = 0;
+      Map<String, double> typeCounts = {};
+
+      for (var transaction in transactions) {
+        if (transaction.direction == "Incoming") {
+          totalIncoming += transaction.amount ?? 0;
+        } else if (transaction.direction == "Outgoing") {
+          totalOutgoing += transaction.amount ?? 0;
+        }
+        typeCounts[transaction.type ?? 'Unknown'] = (typeCounts[transaction.type ?? 'Unknown'] ?? 0) + 1;
+      }
+
+      return {
+        'totals': [totalIncoming, totalOutgoing],
+        'typeCounts': typeCounts.entries.map((entry) => entry.value).toList(),
+      };
+    }
+
     return transactions.where((transaction) => transaction.isValid()).toList();
+
   }
 }
 

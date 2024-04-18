@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class Transaction {
   final int? userId;
@@ -127,7 +128,52 @@ class Transaction {
     return transactions.where((transaction) => transaction.isValid()).toList();
 
   }
+
+  static Map<String, double> aggregateByType(List<Transaction> transactions) {
+    Map<String, double> typeCounts = {};
+    for (var transaction in transactions) {
+      if (transaction.isValid()) {
+        typeCounts[transaction.type ?? 'Unknown'] = (typeCounts[transaction.type ?? 'Unknown'] ?? 0) + 1;
+      }
+    }
+    return typeCounts;
+  }
+
+  static Map<String, Map<String, double>> aggregateByMonth(List<Transaction> transactions) {
+    Map<String, Map<String, double>> dailyData = {};
+    DateFormat dateFormat = DateFormat('dd/MM/yyyy'); // Date format for parsing
+
+    for (var transaction in transactions) {
+      if (transaction.isValid()) {
+        DateTime date;
+        try {
+          date = dateFormat.parse(transaction.date!); // Parsing the date using the correct format
+        } catch (e) {
+          continue; // If parsing fails, skip this transaction
+        }
+        String dayKey = '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}'; // Formulating the key as dd-MM
+
+        // Ensure the map for each day is initialized properly
+        dailyData.putIfAbsent(dayKey, () => {'Incoming': 0.0, 'Outgoing': 0.0});
+
+        // Using null-safe ways to add amounts
+        double amount = transaction.amount ?? 0.0;
+        double currentIncoming = dailyData[dayKey]!['Incoming'] ?? 0.0; // Ensure null safety
+        double currentOutgoing = dailyData[dayKey]!['Outgoing'] ?? 0.0; // Ensure null safety
+
+        if (transaction.direction == 'Incoming') {
+          dailyData[dayKey]!['Incoming'] = currentIncoming + amount;
+        } else if (transaction.direction == 'Outgoing') {
+          dailyData[dayKey]!['Outgoing'] = currentOutgoing + amount;
+        }
+      }
+    }
+    return dailyData;
+  }
 }
+
+
+
 
 class AppUser {
   final String email;

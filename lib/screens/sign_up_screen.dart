@@ -54,9 +54,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () => setState(() async {
+                      onPressed: () async {
                         _imgFile = await chooseImage();
-                      }),
+                        setState(() {});
+                      },
                       child: const Text("Add Image"),
                     ),
                     ElevatedButton(

@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:project1/functions/firebase_functions.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:project1/functions/choose_image.dart';
 
-import '../styling.dart';
+import '../functions/firebase_functions.dart';
+import '../functions/set_persistant_data.dart';
+import '../styling/styling.dart';
 import '../functions/form_validators.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -46,7 +47,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   radius: 65,
                   backgroundColor: Colors.white,
                   backgroundImage: (_imgFile == null)
-                      ? AssetImage('images/default_pfp.png')
+                      ? const AssetImage('images/default_pfp.png')
                       : FileImage(_imgFile!) as ImageProvider,
                 ),
                 const SizedBox(height: 16),
@@ -54,25 +55,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () async {
-                        final ImagePicker picker = ImagePicker();
-                        final XFile? img = await picker.pickImage(
-                          source: ImageSource.gallery,
-                          maxHeight: 250,
-                          maxWidth: 250,
-                        );
-                        if (img == null) return;
-                        setState(() {
-                          _imgFile = File(img.path);
-                        });
-                      },
-                      child: Text("Add Image"),
+                      onPressed: () => setState(() async {
+                        _imgFile = await chooseImage();
+                      }),
+                      child: const Text("Add Image"),
                     ),
                     ElevatedButton(
                       onPressed: () => setState(() {
                         _imgFile = null;
                       }),
-                      child: Text("Remove Image"),
+                      child: const Text("Remove Image"),
                     ),
                   ],
                 ),
@@ -127,37 +119,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
                           } else {
-                            SharedPreferences.getInstance().then((prefs) async {
-                              (String, Map<String, dynamic>) userDoc =
-                                  await getUserDoc();
-
-                              await prefs.setString(
-                                "userDocId",
-                                userDoc.$1,
-                              );
-                              await prefs.setString(
-                                'email',
-                                userDoc.$2["email"],
-                              );
-                              await prefs.setInt(
-                                'id',
-                                userDoc.$2["id"],
-                              );
-                              await prefs.setString(
-                                'pfp',
-                                userDoc.$2["pfp"],
-                              );
-                              await prefs.setString(
-                                'username',
-                                userDoc.$2["username"],
-                              );
-                            });
-
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              "/home",
-                              (route) => false,
-                            );
+                            setPersistantData(context);
                           }
                         });
                       } else {

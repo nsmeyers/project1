@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:project1/functions/firebase_functions.dart';
-import 'package:project1/functions/form_validators.dart';
-import 'package:project1/models.dart';
+import 'package:project1/functions/choose_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../functions/form_validators.dart';
+import '../models/models.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -28,6 +28,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           "Profile",
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                "/sign-in",
+                (route) => false,
+              );
+            },
+            child: const Text(
+              "Sign out",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
         backgroundColor: Colors.grey[900],
       ),
       body: SingleChildScrollView(
@@ -70,17 +88,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           ElevatedButton(
                             onPressed: () async {
-                              final ImagePicker picker = ImagePicker();
-                              final XFile? img = await picker.pickImage(
-                                source: ImageSource.gallery,
-                                maxHeight: 250,
-                                maxWidth: 250,
-                              );
-                              if (img == null) return;
-
-                              File imgFile = File(img.path);
+                              File? imgFile = await chooseImage();
                               String imgString =
-                                  base64Encode(imgFile.readAsBytesSync());
+                                  base64Encode(imgFile!.readAsBytesSync());
                               await user.updatePfp(imgString);
                               setState(() {});
                             },

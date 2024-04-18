@@ -28,7 +28,9 @@ class Transaction {
       userId: json['UserID'] as int?,
       transactionId: json['TransactionID'] as int?,
       type: json['TransactionType'] as String?,
-      amount: json['Amount'] as double?,
+      amount: json['Amount'] is int
+          ? (json['Amount'] as int).toDouble()
+          : json['Amount'] as double?,
       status: json['Status'] as String?,
       date: json['Date'] as String?,
       direction: json['Direction'] as String?,
@@ -61,14 +63,17 @@ class Transaction {
   static Future<List<Transaction>> fetchTransactions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? cachedData = prefs.getString('transactions');
+    int? userId = prefs.getInt("id");
 
     List<Transaction> transactions = [];
 
     if (cachedData != null) {
+      print("Cached data");
       Iterable l = json.decode(cachedData);
       transactions =
           List<Transaction>.from(l.map((model) => Transaction.fromJson(model)));
     } else {
+      print("Api data");
       final response = await http.get(
           Uri.parse('https://my.api.mockaroo.com/account.json?key=fbb1c1a0'));
       if (response.statusCode == 200) {
@@ -80,6 +85,13 @@ class Transaction {
         throw Exception('Failed to load transactions from API');
       }
     }
+
+    // Filter transactions based on userId
+    print('User ID from shared preferences: $userId');
+    transactions = transactions
+        .where((transaction) => transaction.userId == userId)
+        .toList();
+    print('Transactions for User ID $userId: ${transactions.length}');
 
     // Validate each transaction and filter out invalid ones
     return transactions.where((transaction) => transaction.isValid()).toList();
